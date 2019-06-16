@@ -22,7 +22,7 @@ ________________________________________________________________________________
 INSTALL BIND/NAMED/;
 sudo yum install bind bind-utils
 "/etc/named.conf"	-	listen-on port 53 { 127.0.0.1; SERVERIP; };
-				allow-query     { localhost; NETWERK/SUBNET; };
+				allow-query     { localhost; NETWORK/SUBNET; };
 				forwarders { ALT1; ALT2; }
 				dnssec-enable no;
 				dnssec-validation no;
@@ -43,8 +43,8 @@ $TTL 3H
 			3H )	; minimum-TTL
 	NS	DEV.SOME.DOMAIN.
 	A	SERVERIP
-srv1	A	SERVERIP
-www	CNAME	srv1
+DEV	A	SERVERIP
+www	CNAME	DEV
 
 systemctl enable named
 
