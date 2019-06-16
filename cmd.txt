@@ -1,7 +1,7 @@
 INSTALL VIM & VIM SETTINGS;
 vim ~/.vimrc	-	syntax on
-								set number
-								set tabstop=4
+			set number
+			set tabstop=4
 
 ____________________________________________________________________________________________________
 INSTALL SSH & ENABLE LOGIN WITH PUBLIC KEYS;
@@ -13,37 +13,39 @@ ADD PUBLIC KEYS TO "/home/student/.ssh/authorized_keys"
 ____________________________________________________________________________________________________
 SETUP STATIC IP/SUBNET/DNS;
 "/etc/sysconfig/network-scripts/ifcfg-ens192"	-	IPADDR="10.129.34.41"
-																								PREFIX="21"
-																								GATEWAY="10.129.39.254"
-																								DNS1="10.129.28.232"
-																								DNS2="10.129.28.230"
+							PREFIX="21"
+							GATEWAY="10.129.39.254"
+							DNS1="10.129.28.232"
+							DNS2="10.129.28.230"
 
 ____________________________________________________________________________________________________
 INSTALL BIND/NAMED/;
 sudo yum install bind bind-utils
-"/etc/named.conf"		-	listen-on port 53 { 127.0.0.1; 10.129.34.38; };
-											allow-query     { localhost; 10.129.32.0/21; };
-											forwarders { 10.129.28.232; 10.129.28.230; }
-											dnssec-enable no;
-											dnssec-validation no;
+"/etc/named.conf"	-	listen-on port 53 { 127.0.0.1; 10.129.34.38; };
+				allow-query     { localhost; 10.129.32.0/21; };
+				forwarders { 10.129.28.232; 10.129.28.230; }
+				dnssec-enable no;
+				dnssec-validation no;
 
-FOR EACH ZONE ADD			zone "vanderelst.ikdoeict." {
-												type master;
-												file "/var/named/vanderelst.ikdoeict";
-												allow-update { none; };
-											};
+FOR EACH ZONE ADD	zone "vanderelst.ikdoeict." {
+				type master;
+				file "/var/named/vanderelst.ikdoeict";
+				allow-update { none; };
+			};
 
-"/var/named/ZONE.NAME"	-	$TTL 3H
-													@	IN	SOA	srv1.vanderelst.ikdoeict. root.vanderelst.ikdoeict. (
-																						0	; serial
-																						1D	; refresh
-																						1H	; retry
-																						1W	; expire
-																						3H )	; minimum-TTL
-																NS			srv1.vanderelst.ikdoeict.
-																A				10.129.34.41
-													srv1	A				10.129.34.41
-													www		CNAME		srv1
+"/var/named/ZONE.NAME"	
+$TTL 3H
+@	IN	SOA	srv1.vanderelst.ikdoeict. root.vanderelst.ikdoeict. (
+			0	; serial
+			1D	; refresh
+			1H	; retry
+			1W	; expire
+			3H )	; minimum-TTL
+	NS	srv1.vanderelst.ikdoeict.
+	A	10.129.34.41
+srv1	A	10.129.34.41
+www	CNAME	srv1
+
 systemctl enable named
 
 sudo firewall-cmd --zone=public --add-port=53/tcp --permanent
@@ -63,20 +65,21 @@ systemctl restart firewalld
 ____________________________________________________________________________________________________
 INSTALL APACHE/HTTPD;
 sudo yum install apache
-"/etc/httpd/conf/httpd.conf"		-	ServerAdmin dmitriy.vanderelst@student.odisee.be
-																	Remove 'Indexes' (UNDER <Directory "/var/www/html">)
-																	ErrorDocument 403 "Please contact dmitriy.vanderelst@student.odisee.be"
-"/etc/httpd/conf.d/vhosts.conf"	-	#Listen 80
-																	<VirtualHost *:80> (CHANGE PORT FOR VARNISH LATER)
-																		<Directory />
-																			Options FollowSymLinks Includes ExecCGI
-																			AllowOverride All
-																			Require all granted
-																		</Directory>
-																		DocumentRoot /var/www/html/vhosts/vanderelst.ikdoeict/public_html
-																		ServerName www.vanderelst.ikdoeict
-																		#ErrorLog /var/www/html/vhosts/vanderelst.ikdoeict/logs/error.log
-																	</VirtualHost>
+"/etc/httpd/conf/httpd.conf"	-	ServerAdmin dmitriy.vanderelst@student.odisee.be
+Remove 'Indexes' (UNDER <Directory "/var/www/html">)
+ErrorDocument 403 "Please contact dmitriy.vanderelst@student.odisee.be"
+"/etc/httpd/conf.d/vhosts.conf"	
+#Listen 80
+<VirtualHost *:80> (CHANGE PORT FOR VARNISH LATER)
+	<Directory />
+		Options FollowSymLinks Includes ExecCGI
+		AllowOverride All
+		Require all granted
+	</Directory>
+	DocumentRoot /var/www/html/vhosts/vanderelst.ikdoeict/public_html
+	ServerName www.vanderelst.ikdoeict
+	#ErrorLog /var/www/html/vhosts/vanderelst.ikdoeict/logs/error.log
+</VirtualHost>
 
 ____________________________________________________________________________________________________
 INSTALL MYSQL;
@@ -94,7 +97,7 @@ Import .sql file to db:		mysql -u username -p database_name < file.sql
 EXTRA MYSQL STEPS IN CASE OF ERROR;
 ERROR: _mysql_exceptions.OperationalError: (2059, "Authentication plugin 'caching_sha2_password' cannot be loaded: /usr/lib64/mysql/plugin/caching_sha2_password.so: cannot open shared object file: No such file or directory")
 
-"/etc/my.cnf"		-	default_authentication_plugin=mysql_native_password
+"/etc/my.cnf"	-	default_authentication_plugin=mysql_native_password
 systemctl restart mysqld
 
 mysql -u root -pPASSWORD
@@ -115,18 +118,18 @@ sudo yum search php | more
 php -v
 
 IMPORTANT PHP CONFIG SETTINGS;
-/etc/php.ini								-	Expose_php = Off
-															allow_url_fopen = Off
+/etc/php.ini			-	Expose_php = Off
+					allow_url_fopen = Off
 /etc/httpd/conf/httpd.conf	-	ServerTokens Prod
-															ServerSignature Off
+					ServerSignature Off
 
 ____________________________________________________________________________________________________
 INSTALL VARNISH;
 yum install varnish
 "/etc/varnsih/varnish.params"	-	VARNISH_LISTEN_PORT=80
-"/etc/varnsih/default.vcl"		-	backend default {
-										.host = "127.0.0.1";
-										.port = "8080";
-									}
+"/etc/varnsih/default.vcl"	-	backend default {
+						.host = "127.0.0.1";
+						.port = "8080";
+					}
 SET VHOSTS PORTS IN "/etc/httpd/conf.d/vhosts.conf" TO ".port" VALUE
 systemctl restart varnish
