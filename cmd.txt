@@ -77,7 +77,7 @@ ErrorDocument 403 "Please contact ADMIN@ADDRESS.DOMAIN"
 		Require all granted
 	</Directory>
 	DocumentRoot /var/www/html/vhosts/SOME.ZONE/public_html
-	ServerName www.vanderelst.ikdoeict
+	ServerName www.SOME.ZONE
 	#ErrorLog /var/www/html/vhosts/SOME.ZONE/logs/error.log
 </VirtualHost>
 
